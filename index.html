@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amanda Hsu | Technical Game Designer</title>
     
-    <!-- React & Tailwind -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -437,7 +434,7 @@
                                     <div className="grid md:grid-cols-12 gap-10 items-center">
                                         <div className="md:col-span-6 relative overflow-hidden rounded-lg shadow-2xl border border-white/10 flex flex-col bg-black">
                                             {project.type === 'terminal' ? (
-                                                <div className="w-full aspect-video">
+                                                <div className="w-full h-96 md:h-auto md:aspect-video">
                                                      <TerminalVisual lines={project.terminalLines} />
                                                 </div>
                                             ) : (
@@ -500,7 +497,7 @@
                                 
                                 <div className="mb-8 w-full bg-black rounded-lg border border-white/10 overflow-hidden relative">
                                     {selectedProject.type === 'terminal' ? (
-                                        <div className="w-full aspect-video">
+                                        <div className="w-full h-96 md:h-auto md:aspect-video">
                                             <TerminalVisual lines={selectedProject.terminalLines} />
                                         </div>
                                     ) : (
