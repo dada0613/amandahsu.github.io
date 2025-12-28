@@ -19,7 +19,7 @@
     <style>
         body {
             background-color: #050505;
-            color: #e5e5e5;
+            color: #f5f5f5;
             font-family: 'Rajdhani', sans-serif;
             overflow-x: hidden;
             margin: 0;
@@ -60,10 +60,10 @@
         }
 
         .glass-panel {
-            background: rgba(12, 12, 12, 0.8);
+            background: rgba(25, 25, 25, 0.95);
             backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
         }
 
         .page-enter {
@@ -117,9 +117,6 @@
         const ArrowLeft = (props) => (
             <IconWrapper {...props}><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></IconWrapper>
         );
-        const Download = (props) => (
-            <IconWrapper {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></IconWrapper>
-        );
 
         const ThreeBackground = () => {
             const mountRef = useRef(null);
@@ -167,11 +164,9 @@
 
                 const animate = () => {
                     requestAnimationFrame(animate);
-                    
                     particles.rotation.y += 0.0008;
                     particles.rotation.x += 0.05 * (mouseY - particles.rotation.x);
                     particles.rotation.z += 0.05 * (mouseX - particles.rotation.z);
-
                     renderer.render(scene, camera);
                 };
                 animate();
@@ -226,7 +221,7 @@
                     tags: ["Unity", "C#", "Enemy AI", "Combat Balance", "Iterative Design"],
                     desc: "Scripted 4 distinct enemy AI behaviors and tower defense functionalities. Heavily utilized weekly playtest data to iterate on movement patterns and difficulty balancing, ensuring a fair yet challenging combat loop.",
                     detailedDesc: "For Claw Patrol, I designed a modular AI system. The goal was to have enemies that felt responsive but predictable enough for a platformer. I used a State Pattern to manage behaviors.",
-                    visual: CLAW_PATROL_IMAGE_URL,
+                    visual: CLAW_PATROL_IMAGE_URL, 
                     type: "image",
                     link: "https://ecse-csds290.itch.io/2024-team-6"
                 },
@@ -331,7 +326,7 @@
             };
 
             const Nav = () => (
-                <nav className="fixed top-0 w-full bg-black/80 backdrop-blur-md border-b border-white/5 z-50">
+                <nav className="fixed top-0 w-full bg-black/80 backdrop-blur-md border-b border-white/10 z-50">
                     <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                         <div 
                             className="flex items-center gap-3 cursor-pointer group"
@@ -347,19 +342,19 @@
                         <div className="flex gap-8 text-sm uppercase tracking-widest font-bold items-center">
                             <button 
                                 onClick={() => setView('home')}
-                                className={`${view === 'home' ? 'text-yellow-500' : 'text-neutral-500 hover:text-white'} transition-colors duration-300`}
+                                className={`${view === 'home' ? 'text-yellow-500' : 'text-neutral-300 hover:text-white'} transition-colors duration-300`}
                             >
                                 Home
                             </button>
                             <button 
                                 onClick={() => setView('about')}
-                                className={`${view === 'about' ? 'text-yellow-500' : 'text-neutral-500 hover:text-white'} transition-colors duration-300`}
+                                className={`${view === 'about' ? 'text-yellow-500' : 'text-neutral-300 hover:text-white'} transition-colors duration-300`}
                             >
                                 About
                             </button>
                             <button 
                                 onClick={() => setView('resume')}
-                                className={`${view === 'resume' ? 'text-black bg-yellow-600 border-yellow-600' : 'text-neutral-400 border-neutral-700 hover:border-yellow-500 hover:text-yellow-500'} border px-4 py-2 transition-all duration-300 flex items-center gap-2`}
+                                className={`${view === 'resume' ? 'text-black bg-yellow-600 border-yellow-600' : 'text-neutral-200 border-neutral-600 hover:border-yellow-500 hover:text-yellow-500'} border px-4 py-2 transition-all duration-300 flex items-center gap-2`}
                             >
                                 Resume
                             </button>
@@ -371,7 +366,7 @@
             const TerminalVisual = ({ lines }) => (
                 <div className="w-full h-full bg-[#0a0a0a] border-t-2 border-neutral-800 p-4 font-retro text-lg leading-snug overflow-hidden relative shadow-inner flex flex-col justify-start">
                     <div className="absolute top-0 left-0 w-full h-1 bg-green-500/20"></div>
-                    <div className="text-green-500/80">
+                    <div className="text-green-400">
                         {lines.map((line, i) => (
                             <div key={i} className="mb-1">
                                 {line.startsWith('>') ? <span className="text-yellow-500 font-bold">{line}</span> : line}
@@ -382,7 +377,7 @@
                             <span className="w-3 h-5 bg-green-500 cursor-blink"></span>
                         </div>
                     </div>
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] pointer-events-none"></div>
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20"></div>
                 </div>
             );
 
@@ -396,31 +391,31 @@
                             Technical <br />
                             <span className="text-gold-gradient block mt-2 tracking-wide">Game Designer</span>
                         </h1>
-                        <p className="text-xl md:text-2xl text-neutral-400 max-w-3xl mx-auto leading-relaxed mb-12 font-light tracking-wide">
+                        <p className="text-xl md:text-2xl text-neutral-200 max-w-3xl mx-auto leading-relaxed mb-12 font-light tracking-wide">
                             {portfolioData.tagline}
                         </p>
                         
                         <div className="flex gap-6 mb-20">
                              <button 
                                 onClick={() => document.getElementById('projects-grid').scrollIntoView({ behavior: 'smooth' })}
-                                className="bg-transparent border border-yellow-600 text-yellow-500 hover:bg-yellow-600 hover:text-black px-8 py-3 rounded-sm font-hero font-bold text-sm tracking-widest uppercase transition-all flex items-center gap-2"
+                                className="bg-transparent border-2 border-yellow-600 text-yellow-500 hover:bg-yellow-600 hover:text-black px-8 py-3 rounded-sm font-hero font-bold text-sm tracking-widest uppercase transition-all flex items-center gap-2"
                             >
                                 <ArrowRight size={16} className="rotate-90" /> Scroll to Projects
                             </button>
                         </div>
 
-                        <div className="flex justify-center flex-wrap gap-8 text-neutral-600 text-xs font-bold tracking-[0.2em] uppercase font-hero opacity-60">
+                        <div className="flex justify-center flex-wrap gap-8 text-neutral-300 text-xs font-bold tracking-[0.2em] uppercase font-hero opacity-80">
                             {portfolioData.skills.map((skill, idx) => (
                                 <span key={idx}>{skill}</span>
                             ))}
                         </div>
                     </div>
 
-                    <div id="projects-grid" className="py-32 px-6 max-w-7xl mx-auto border-t border-white/5 bg-black/50">
+                    <div id="projects-grid" className="py-32 px-6 max-w-7xl mx-auto border-t border-white/10 bg-black/50">
                         <div className="mb-16 flex items-end justify-between">
                             <div>
                                 <h2 className="text-5xl font-hero font-bold text-white uppercase mb-2">Selected Works</h2>
-                                <p className="text-neutral-400 font-light text-lg">Systems, Tools, and Gameplay</p>
+                                <p className="text-neutral-200 font-light text-lg">Systems, Tools, and Gameplay</p>
                             </div>
                         </div>
 
@@ -428,7 +423,7 @@
                             {portfolioData.projects.map((project, index) => (
                                 <div 
                                     key={project.id} 
-                                    className="group relative bg-neutral-900/40 p-8 rounded-xl border border-white/5 hover:border-yellow-600/50 hover:bg-neutral-900/60 transition-all duration-300 cursor-pointer"
+                                    className="group relative bg-neutral-900/80 p-8 rounded-xl border border-white/20 hover:border-yellow-600/50 hover:bg-neutral-800 transition-all duration-300 cursor-pointer shadow-xl"
                                     onClick={() => navigateToProject(project)}
                                 >
                                     <div className="grid md:grid-cols-12 gap-10 items-center">
@@ -453,15 +448,15 @@
 
                                         <div className="md:col-span-6 flex flex-col justify-center">
                                             <h3 className="text-5xl font-hero font-bold text-white mb-2 group-hover:text-yellow-400 transition-colors uppercase">{project.title}</h3>
-                                            <h4 className="text-sm text-yellow-600 uppercase tracking-[0.2em] font-bold mb-6">{project.subtitle}</h4>
+                                            <h4 className="text-sm text-yellow-500 uppercase tracking-[0.2em] font-bold mb-6">{project.subtitle}</h4>
                                             
-                                            <p className="text-neutral-300 leading-relaxed text-sm mb-6 font-light line-clamp-3">
+                                            <p className="text-neutral-100 leading-relaxed text-sm mb-6 font-normal line-clamp-3">
                                                 {project.desc}
                                             </p>
                                             
                                             <div className="flex flex-wrap gap-2 mb-6">
                                                 {project.tags.map(tag => (
-                                                    <span key={tag} className="text-[9px] px-2 py-1 bg-black text-neutral-400 font-bold uppercase tracking-wider border border-white/10">
+                                                    <span key={tag} className="text-[10px] px-2 py-1 bg-black text-white font-bold uppercase tracking-wider border border-white/30">
                                                         {tag}
                                                     </span>
                                                 ))}
@@ -485,7 +480,7 @@
                     <div className="min-h-screen pt-32 pb-20 px-6 max-w-6xl mx-auto page-enter">
                         <button 
                             onClick={() => setView('home')} 
-                            className="mb-8 text-neutral-500 hover:text-white flex items-center gap-2 text-sm uppercase tracking-widest font-bold transition-colors"
+                            className="mb-8 text-neutral-200 hover:text-white flex items-center gap-2 text-sm uppercase tracking-widest font-bold transition-colors"
                         >
                             <ArrowLeft size={16} /> Back to Projects
                         </button>
@@ -495,7 +490,7 @@
                                 <h1 className="text-6xl font-hero font-bold text-white uppercase mb-4">{selectedProject.title}</h1>
                                 <p className="text-xl text-yellow-500 font-light mb-8">{selectedProject.subtitle}</p>
                                 
-                                <div className="mb-8 w-full bg-black rounded-lg border border-white/10 overflow-hidden relative">
+                                <div className="mb-8 w-full bg-black rounded-lg border border-white/20 overflow-hidden relative shadow-2xl">
                                     {selectedProject.type === 'terminal' ? (
                                         <div className="w-full h-96 md:h-auto md:aspect-video">
                                             <TerminalVisual lines={selectedProject.terminalLines} />
@@ -506,7 +501,7 @@
                                 </div>
 
                                 <h3 className="text-xl font-bold text-white uppercase mb-4 border-l-4 border-yellow-600 pl-4">Technical Breakdown</h3>
-                                <div className="text-neutral-300 leading-loose font-light space-y-6">
+                                <div className="text-neutral-100 leading-loose font-light space-y-6">
                                     <p>{selectedProject.desc}</p>
                                     <p>{selectedProject.detailedDesc}</p>
                                 </div>
@@ -514,29 +509,29 @@
 
                             <div className="md:col-span-2">
                                 <div className="glass-panel p-8 rounded-lg sticky top-32">
-                                    <h4 className="text-xs text-neutral-500 uppercase tracking-widest font-bold mb-8">Project Info</h4>
+                                    <h4 className="text-xs text-neutral-200 uppercase tracking-widest font-bold mb-8">Project Info</h4>
                                     
                                     <div className="space-y-8">
                                         <div>
-                                            <span className="block text-xs text-neutral-600 uppercase font-bold mb-2">Role</span>
+                                            <span className="block text-xs text-neutral-300 uppercase font-bold mb-2">Role</span>
                                             <span className="text-white text-lg font-light leading-snug block">{selectedProject.role}</span>
                                         </div>
                                         <div>
-                                            <span className="block text-xs text-neutral-600 uppercase font-bold mb-2">Engine</span>
+                                            <span className="block text-xs text-neutral-300 uppercase font-bold mb-2">Engine</span>
                                             <span className="text-white text-lg font-light">{selectedProject.tags[0]}</span>
                                         </div>
                                         <div>
-                                            <span className="block text-xs text-neutral-600 uppercase font-bold mb-3">Key Tech</span>
+                                            <span className="block text-xs text-neutral-300 uppercase font-bold mb-3">Key Tech</span>
                                             <div className="flex flex-wrap gap-2">
                                                 {selectedProject.tags.slice(1).map(tag => (
-                                                    <span key={tag} className="text-xs px-3 py-1.5 bg-white/5 text-yellow-500 border border-white/10 rounded-sm">
+                                                    <span key={tag} className="text-xs px-3 py-1.5 bg-white/10 text-yellow-500 border border-white/20 rounded-sm">
                                                         {tag}
                                                     </span>
                                                 ))}
                                             </div>
                                         </div>
                                         
-                                        <div className="pt-8 border-t border-white/10">
+                                        <div className="pt-8 border-t border-white/20">
                                             <a 
                                                 href={selectedProject.link} 
                                                 target="_blank"
@@ -557,16 +552,16 @@
                 const { resume, contact } = portfolioData;
 
                 return (
-                    <div className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto page-enter print:pt-0 print:pb-0 print:bg-white print:text-black">
-                        <div className="glass-panel p-12 relative overflow-hidden print:shadow-none print:border-none print:p-0 print:text-black bg-neutral-900/80">
+                    <div className="min-h-screen pt-32 pb-20 px-4 md:px-6 max-w-4xl mx-auto page-enter print:pt-0 print:pb-0 print:bg-white print:text-black">
+                        <div className="glass-panel p-6 md:p-12 relative overflow-hidden print:shadow-none print:border-none print:p-0 print:text-black bg-neutral-900/90">
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 print:hidden"></div>
 
-                            <header className="border-b-2 border-neutral-700 pb-8 mb-8 flex justify-between items-start print:border-black">
+                            <header className="border-b-2 border-neutral-700 pb-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-start gap-6 md:gap-0 print:border-black print:flex-row print:gap-0">
                                 <div>
                                     <h1 className="text-4xl font-bold text-white mb-2 uppercase font-hero tracking-wide print:text-black">Amanda Hsu</h1>
                                     <h2 className="text-lg text-yellow-500 font-mono tracking-widest uppercase print:text-black">Technical Game Designer</h2>
                                 </div>
-                                <div className="text-right text-sm text-neutral-400 leading-relaxed print:text-black">
+                                <div className="text-left md:text-right text-sm text-neutral-100 leading-relaxed print:text-black print:text-right">
                                     <p>{contact.phone}</p>
                                     <p>{contact.email}</p>
                                     <p>{contact.location}</p>
@@ -575,7 +570,7 @@
 
                             <section className="mb-8">
                                 <h3 className="text-sm font-bold text-yellow-500 uppercase tracking-widest mb-3 border-b border-neutral-800 pb-1 print:text-black print:border-black">Professional Summary</h3>
-                                <p className="text-neutral-300 text-sm leading-relaxed font-light print:text-black">
+                                <p className="text-neutral-100 text-sm leading-relaxed font-normal print:text-black">
                                     {resume.summary}
                                 </p>
                             </section>
@@ -586,7 +581,7 @@
                                     {Object.entries(resume.skillCategories).map(([category, skills]) => (
                                         <div key={category}>
                                             <h4 className="text-xs font-bold text-white uppercase mb-1 print:text-black">{category}</h4>
-                                            <p className="text-xs text-neutral-400 print:text-black">{skills}</p>
+                                            <p className="text-xs text-neutral-200 print:text-black">{skills}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -597,13 +592,13 @@
                                 <div className="space-y-6">
                                     {resume.experience.map((exp, idx) => (
                                         <div key={idx}>
-                                            <div className="flex justify-between items-baseline mb-1">
-                                                <h4 className="text-white font-bold text-sm print:text-black">{exp.title}</h4>
-                                                <span className="text-xs text-neutral-500 font-mono print:text-black">{exp.period}</span>
+                                            <div className="flex flex-wrap justify-between items-baseline mb-1">
+                                                <h4 className="text-white font-bold text-sm print:text-black mr-2">{exp.title}</h4>
+                                                <span className="text-xs text-neutral-300 font-mono print:text-black">{exp.period}</span>
                                             </div>
                                             <ul className="list-disc list-outside ml-4 space-y-1">
                                                 {exp.details.map((detail, dIdx) => (
-                                                    <li key={dIdx} className="text-xs text-neutral-300 pl-1 print:text-black">{detail}</li>
+                                                    <li key={dIdx} className="text-xs text-neutral-100 pl-1 print:text-black">{detail}</li>
                                                 ))}
                                             </ul>
                                         </div>
@@ -616,13 +611,13 @@
                                 <div className="space-y-6">
                                     {resume.work.map((job, idx) => (
                                         <div key={idx}>
-                                            <div className="flex justify-between items-baseline mb-1">
-                                                <h4 className="text-white font-bold text-sm print:text-black">{job.role} <span className="text-neutral-500 font-normal">| {job.company}</span></h4>
-                                                <span className="text-xs text-neutral-500 font-mono print:text-black">{job.period}</span>
+                                            <div className="flex flex-wrap justify-between items-baseline mb-1">
+                                                <h4 className="text-white font-bold text-sm print:text-black mr-2">{job.role} <span className="text-neutral-200 font-normal">| {job.company}</span></h4>
+                                                <span className="text-xs text-neutral-300 font-mono print:text-black">{job.period}</span>
                                             </div>
                                             <ul className="list-disc list-outside ml-4 space-y-1">
                                                 {job.details.map((detail, dIdx) => (
-                                                    <li key={dIdx} className="text-xs text-neutral-300 pl-1 print:text-black">{detail}</li>
+                                                    <li key={dIdx} className="text-xs text-neutral-100 pl-1 print:text-black">{detail}</li>
                                                 ))}
                                             </ul>
                                         </div>
@@ -630,18 +625,19 @@
                                 </div>
                             </section>
 
+                            {/* Education */}
                             <section>
                                 <h3 className="text-sm font-bold text-yellow-500 uppercase tracking-widest mb-4 border-b border-neutral-800 pb-1 print:text-black print:border-black">Education</h3>
                                 <div className="space-y-4">
                                     {resume.education.map((edu, idx) => (
                                         <div key={idx}>
-                                            <div className="flex justify-between items-baseline mb-1">
-                                                <h4 className="text-white font-bold text-sm print:text-black">{edu.school}</h4>
-                                                <span className="text-xs text-neutral-500 font-mono print:text-black">{edu.period}</span>
+                                            <div className="flex flex-wrap justify-between items-baseline mb-1">
+                                                <h4 className="text-white font-bold text-sm print:text-black mr-2">{edu.school}</h4>
+                                                <span className="text-xs text-neutral-300 font-mono print:text-black">{edu.period}</span>
                                             </div>
-                                            <p className="text-xs text-neutral-300 italic mb-1 print:text-black">{edu.degree}</p>
+                                            <p className="text-xs text-neutral-200 italic mb-1 print:text-black">{edu.degree}</p>
                                             {edu.details.length > 0 && (
-                                                <p className="text-xs text-neutral-400 print:text-black">{edu.details.join(" • ")}</p>
+                                                <p className="text-xs text-neutral-200 print:text-black">{edu.details.join(" • ")}</p>
                                             )}
                                         </div>
                                     ))}
@@ -658,39 +654,38 @@
                         <div className="md:col-span-5">
                             <div className="glass-panel p-8 relative overflow-hidden rounded-lg border-t-4 border-yellow-600">
                                 <h3 className="text-2xl font-hero font-bold text-white mb-6 uppercase">Contact</h3>
-                                <div className="space-y-4 text-sm text-neutral-300 mb-8">
+                                <div className="space-y-4 text-sm text-neutral-100 mb-8">
                                     <div>
-                                        <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Email</p>
+                                        <p className="text-xs text-neutral-300 uppercase tracking-wider mb-1">Email</p>
                                         <a href={`mailto:${portfolioData.contact.email}`} className="text-white hover:text-yellow-500 transition-colors flex items-center gap-2">
                                             {portfolioData.contact.email}
                                         </a>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Based In</p>
+                                        <p className="text-xs text-neutral-300 uppercase tracking-wider mb-1">Based In</p>
                                         <p className="text-white">Cleveland, OH (Open to Relocate)</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Nationality</p>
+                                        <p className="text-xs text-neutral-300 uppercase tracking-wider mb-1">Nationality</p>
                                         <p className="text-white">Taiwan</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Languages</p>
+                                        <p className="text-xs text-neutral-300 uppercase tracking-wider mb-1">Languages</p>
                                         <p className="text-white">Mandarin, English</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Education</p>
+                                        <p className="text-xs text-neutral-300 uppercase tracking-wider mb-1">Education</p>
                                         <p className="text-white">Case Western Reserve Univ.</p>
-                                        <p className="text-xs text-yellow-600 mt-1">CS & Theater Arts '27</p>
-                                        <p className="text-xs text-neutral-400">Game Design Minor</p>
+                                        <p className="text-xs text-yellow-600 mt-1 font-bold">CS & Theater Arts '27</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="mt-8">
-                                <h4 className="text-sm font-bold text-white uppercase tracking-widest mb-4 border-b border-white/10 pb-2">Technical Skills</h4>
+                                <h4 className="text-sm font-bold text-white uppercase tracking-widest mb-4 border-b border-white/20 pb-2">Technical Skills</h4>
                                 <div className="flex flex-wrap gap-2">
                                     {portfolioData.skills.map(skill => (
-                                        <span key={skill} className="px-3 py-2 bg-neutral-900 text-neutral-400 text-xs border border-white/5 rounded-sm">
+                                        <span key={skill} className="px-3 py-2 bg-neutral-900 text-white text-xs border border-white/30 rounded-sm">
                                             {skill}
                                         </span>
                                     ))}
@@ -702,9 +697,9 @@
                             <h2 className="text-5xl font-hero font-bold text-white mb-8 uppercase">
                                 About Me
                             </h2>
-                            <div className="space-y-6 text-lg text-neutral-300 font-light leading-loose">
+                            <div className="space-y-6 text-lg text-neutral-100 font-light leading-loose">
                                 <p>
-                                    Hi, I’m <strong className="text-white">Amanda Hsu</strong>. I’m passionate about <strong>hands-on game development</strong> and using scripting and code to bring gameplay ideas to life.
+                                    Hi, I’m <strong className="text-white font-bold">Amanda Hsu</strong>. I’m passionate about <strong>hands-on game development</strong> and using scripting and code to bring gameplay ideas to life.
                                 </p>
                                 <p>
                                     I enjoy prototyping mechanics, implementing game systems, and iterating on features alongside designers and engineers.
@@ -713,7 +708,7 @@
                                     I’m especially interested in turning concepts into playable experiences and contributing directly to how a game feels and plays, while learning to work within existing systems and workflows.
                                 </p>
                                 
-                                <p className="mt-8 pt-8 border-t border-white/10">
+                                <p className="mt-8 pt-8 border-t border-white/20 text-neutral-200">
                                     Currently studying at <strong>CWRU</strong>, I am seeking a <strong>Tech Design Internship</strong> for Summer 2026 where I can contribute directly to gameplay implementation and system design.
                                 </p>
                             </div>
@@ -736,8 +731,8 @@
                             {view === 'resume' && <ResumeView />}
                         </main>
 
-                        <footer className="border-t border-white/5 py-12 text-center bg-black/80 backdrop-blur-md print:hidden">
-                            <p className="text-neutral-600 text-[10px] tracking-[0.3em] uppercase font-bold">© 2025 Amanda Hsu. Tech Design.</p>
+                        <footer className="border-t border-white/10 py-12 text-center bg-black/80 backdrop-blur-md print:hidden">
+                            <p className="text-neutral-400 text-[10px] tracking-[0.3em] uppercase font-bold">© 2025 Amanda Hsu. Tech Design.</p>
                         </footer>
                     </div>
                 </div>
