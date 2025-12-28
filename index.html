@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amanda Hsu | Technical Game Designer</title>
+    
+    <!-- React & Tailwind -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #050505;
+            color: #e5e5e5;
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        /* Gold Gradient Text - Smoother Version */
+        .text-gold-gradient {
+            background: linear-gradient(
+                135deg, 
+                #FFF8DC 0%,    /* Cornsilk (Very Light) */
+                #F0E68C 30%,   /* Khaki (Light Gold) */
+                #DAA520 70%,   /* Goldenrod (Rich Gold) */
+                #B8860B 100%   /* Dark Goldenrod (Shadow) */
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            filter: drop-shadow(0 0 15px rgba(218, 165, 32, 0.3));
+        }
+
+        .font-hero {
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+        }
+        
+        .font-retro {
+            font-family: 'VT323', monospace;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #DAA520;
+            border-radius: 4px;
+        }
+
+        .glass-panel {
+            background: rgba(12, 12, 12, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        /* Page Transitions */
+        .page-enter {
+            animation: fadeSlideUp 0.6s ease-out forwards;
+        }
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            outline: none;
+            pointer-events: none;
+        }
+        
+        /* Terminal Blink Effect */
+        .cursor-blink {
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Icons ---
+        const IconWrapper = ({ children, size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {children}
+            </svg>
+        );
+        const ExternalLink = (props) => (
+            <IconWrapper {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></IconWrapper>
+        );
+        const ArrowRight = (props) => (
+            <IconWrapper {...props}><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></IconWrapper>
+        );
+        const ArrowLeft = (props) => (
+            <IconWrapper {...props}><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></IconWrapper>
+        );
+        const Download = (props) => (
+            <IconWrapper {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></IconWrapper>
+        );
+
+        // --- 3D Background ---
+        const ThreeBackground = () => {
+            const mountRef = useRef(null);
+            useEffect(() => {
+                const scene = new THREE.Scene();
+                scene.fog = new THREE.FogExp2(0x050505, 0.002);
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.z = 30;
+                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                if (mountRef.current) mountRef.current.appendChild(renderer.domElement);
+
+                const geometry = new THREE.BufferGeometry();
+                const count = 900;
+                const positions = new Float32Array(count * 3);
+                for(let i = 0; i < count * 3; i++) positions[i] = (Math.random() - 0.5) * 80;
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                
+                const material = new THREE.PointsMaterial({
+                    color: 0xF0E68C, size: 0.15, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending
+                });
+                const particles = new THREE.Points(geometry, material);
+                scene.add(particles);
+
+                let mouseX = 0, mouseY = 0;
+                const onMove = (e) => {
+                    mouseX = (e.clientX - window.innerWidth/2) * 0.001;
+                    mouseY = (e.clientY - window.innerHeight/2) * 0.001;
+                };
+                document.addEventListener('mousemove', onMove);
+
+                const animate = () => {
+                    requestAnimationFrame(animate);
+                    particles.rotation.y += 0.001;
+                    particles.rotation.x += 0.03 * (mouseY - particles.rotation.x);
+                    particles.rotation.y += 0.03 * (mouseX - particles.rotation.y);
+                    renderer.render(scene, camera);
+                };
+                animate();
+
+                const handleResize = () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                };
+                window.addEventListener('resize', handleResize);
+
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    document.removeEventListener('mousemove', onMove);
+                    if (mountRef.current && renderer.domElement) mountRef.current.removeChild(renderer.domElement);
+                };
+            }, []);
+            return <div ref={mountRef} className="fixed top-0 left-0 w-full h-full pointer-events-none" />;
+        };
+
+        // --- Data ---
+        const BEDLAM_IMAGE_URL = "https://img.itch.zone/aW1nLzI0MzUyNTMyLnBuZw==/315x250%23c/KkcSLX.png";
+        const CLAW_PATROL_IMAGE_URL = "https://img.itch.zone/aW1hZ2UvMjY1MzY4OS8xNTk2MTY4OS5wbmc=/794x1000/LCgUY6.png";
+
+        const portfolioData = {
+            tagline: "Bridging the gap between Engineering & Art.",
+            contact: { 
+                email: "amandahsu0613@gmail.com",
+                phone: "(440) 431-7016",
+                location: "Cleveland, OH"
+            },
+            skills: ["C# / C++ / Python", "Unity & Unreal Engine", "Systems Architecture", "Gameplay Scripting", "Finite State Machines", "Tools Programming"],
+            resumeLink: "Technical Game Design - Resume.pdf",
+            projects: [
+                {
+                    id: 1,
+                    title: "Bedlam",
+                    subtitle: "3D Horror Interaction System",
+                    role: "Technical Designer (Layout & Narrative), Sound Designer", 
+                    tags: ["Unity", "C#", "Event Trigger Sys", "Prop Scripting", "Sound Design"], 
+                    desc: "Engineered a decoupled interaction system using C# Interfaces, allowing designers to drag-and-drop behavior onto any prop without code dependency. Also implemented a custom Event Management System to synchronize lighting and audio scares.",
+                    detailedDesc: "Lighting utility is the key. In this spooky hospital, guide your comatose body to safety as a robot. Switch between robot and gurney modes, avoid danger, and use light to survive. Bedlam is a psychological horror game where environment interaction drives the experience. My role was to build a robust 'Interactable' system. Instead of hardcoding behaviors, I created a component-based architecture where any object could be made interactable by adding a specific script.",
+                    visual: BEDLAM_IMAGE_URL, 
+                    type: "image",
+                    link: "https://cwru-ecse390.itch.io/bedlam-f2025-team-2"
+                },
+                {
+                    id: 2,
+                    title: "Claw Patrol",
+                    subtitle: "AI State Machine Architecture",
+                    role: "AI Design, Tower Systems & Playtest Iteration",
+                    tags: ["Unity", "C#", "Enemy AI", "Combat Balance", "Iterative Design"],
+                    desc: "Scripted 4 distinct enemy AI behaviors and tower defense functionalities. Heavily utilized weekly playtest data to iterate on movement patterns and difficulty balancing, ensuring a fair yet challenging combat loop.",
+                    detailedDesc: "For Claw Patrol, I designed a modular AI system. The goal was to have enemies that felt responsive but predictable enough for a platformer. I used a State Pattern to manage behaviors.",
+                    visual: CLAW_PATROL_IMAGE_URL,
+                    type: "image",
+                    link: "https://ecse-csds290.itch.io/2024-team-6"
+                },
+                {
+                    id: 3,
+                    title: "Jade & Co",
+                    subtitle: "Interactive Narrative Adventure",
+                    role: "Gameplay Programmer & Designer",
+                    tags: ["Web", "Gameplay Logic", "Puzzle Design", "Level Design", "State Management"],
+                    desc: "Designed and scripted a non-linear text adventure game focused on exploration and puzzles. Implemented complex state tracking to ensure player actions and inventory choices permanently alter the game world.",
+                    detailedDesc: "Jade & Co is a gameplay-first text adventure. My focus was on designing intricate puzzle dependency chains and scripting the logic to support them. I built a dynamic state system that tracks not just inventory, but world states—allowing players to solve puzzles in different orders while ensuring the narrative logic never breaks.",
+                    type: "terminal", 
+                    terminalLines: [
+                        "> LOOK AROUND",
+                        "You are in a damp cave. A stone face blocks the path.",
+                        "> EXAMINE FACE",
+                        "The statue speaks: 'I have cities, but no houses. What am I?'",
+                        "> SAY MAP",
+                        "The stone face crumbles. The path is clear."
+                    ],
+                    link: "https://play.textadventures.co.uk/textadventures/lk-wccykh0ofauco36ficg"
+                }
+            ],
+            // Resume Data
+            resume: {
+                summary: "Technical Game Designer with a dual background in Computer Science and Theater Arts. Experienced in prototyping gameplay mechanics, implementing game systems, and scripting interactive environments. Passionate about creating immersive, narrative-driven experiences and turning design concepts into playable content using scalable C# frameworks.",
+                education: [
+                    {
+                        school: "Case Western Reserve University",
+                        period: "2023-2027",
+                        degree: "Bachelor of Arts (Double Major)",
+                        details: ["Computer Science Major", "Theater Arts Major", "Gaming Minor", "CSDS Department GPA: 4.0"]
+                    },
+                    {
+                        school: "Trinity College Dublin",
+                        period: "Fall 2024",
+                        degree: "Study Abroad",
+                        details: []
+                    }
+                ],
+                experience: [
+                    {
+                        title: "Bedlam - 3D Horror Hospital Escape",
+                        period: "Fall 2025",
+                        details: [
+                            "Scripted core gameplay mechanics for player interaction and item usage using C#.",
+                            "Designed and implemented the 'Robot vs Gurney' transformation mechanic.",
+                            "Collaborated with level designers to script dynamic scare events and audio triggers."
+                        ]
+                    },
+                    {
+                        title: "Claw Patrol - 2D Tower Defending",
+                        period: "Spring 2024",
+                        details: [
+                            "Programmed 4 unique enemy AI behaviors and wave spawning logic.",
+                            "Designed and balanced tower stats based on playtest feedback to ensure fair difficulty.",
+                            "Implemented the core game loop, including win/loss states and resource management."
+                        ]
+                    },
+                    {
+                        title: "Jade & Co. - Text Adventure",
+                        period: "Spring 2024",
+                        details: [
+                            "Designed the game's puzzle flow and world layout for non-linear exploration.",
+                            "Scripted all gameplay logic, handling complex state changes and inventory puzzles."
+                        ]
+                    }
+                ],
+                work: [
+                    {
+                        role: "Teaching Assistant - Data Structure",
+                        company: "Case Western Reserve University",
+                        period: "Spring 2026",
+                        details: ["Selected to mentor students on core algorithms (Graphs, Trees) and debug complex Java/C++ codebases."]
+                    },
+                    {
+                        role: "Scene Shop Technician",
+                        company: "Theater Department",
+                        period: "2024-Now",
+                        details: ["Built scenery using spatial design and visual composition principles.", "Collaborated with designers in fast-paced productions."]
+                    }
+                ],
+                skillCategories: {
+                    "Core Skills": "Systems Design, Combat Balancing, Level Design, Puzzle Design, UX Flows, Interaction Design",
+                    "Technical": "C#, C++, Java, Python, HTML/CSS, Unity, Git/GitHub, VS Code",
+                    "Design & Multimedia": "Adobe Creative Suite, VectorWorks, Reaper",
+                    "Languages": "Mandarin (Fluent), English (Fluent)"
+                }
+            }
+        };
+
+        // --- Main App Component ---
+        const App = () => {
+            const [view, setView] = useState('home'); // 'home', 'about', 'detail-ID', 'resume'
+            const [selectedProject, setSelectedProject] = useState(null);
+            
+            // Scroll to top on view change
+            useEffect(() => {
+                window.scrollTo(0, 0);
+            }, [view]);
+
+            const navigateToProject = (project) => {
+                setSelectedProject(project);
+                setView('detail');
+            };
+
+            const Nav = () => (
+                <nav className="fixed top-0 w-full bg-black/80 backdrop-blur-md border-b border-white/5 z-50">
+                    <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                        <div 
+                            className="flex items-center gap-3 cursor-pointer group"
+                            onClick={() => setView('home')}
+                        >
+                            <div className="w-10 h-10 border border-yellow-600/50 rounded-sm flex items-center justify-center text-yellow-500 bg-black group-hover:bg-yellow-600 group-hover:text-black transition-colors">
+                                <span className="font-hero font-bold text-xl">A</span>
+                            </div>
+                            <span className="font-hero font-bold text-xl tracking-widest text-white group-hover:text-yellow-500 transition-colors">
+                                AMANDA HSU
+                            </span>
+                        </div>
+                        <div className="flex gap-8 text-sm uppercase tracking-widest font-bold items-center">
+                            <button 
+                                onClick={() => setView('home')}
+                                className={`${view === 'home' ? 'text-yellow-500' : 'text-neutral-500 hover:text-white'} transition-colors duration-300`}
+                            >
+                                Home
+                            </button>
+                            <button 
+                                onClick={() => setView('about')}
+                                className={`${view === 'about' ? 'text-yellow-500' : 'text-neutral-500 hover:text-white'} transition-colors duration-300`}
+                            >
+                                About
+                            </button>
+                            <button 
+                                onClick={() => setView('resume')}
+                                className={`${view === 'resume' ? 'text-black bg-yellow-600 border-yellow-600' : 'text-neutral-400 border-neutral-700 hover:border-yellow-500 hover:text-yellow-500'} border px-4 py-2 transition-all duration-300 flex items-center gap-2`}
+                            >
+                                Resume
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+            );
+
+            // --- Terminal Component for Jade & Co ---
+            const TerminalVisual = ({ lines }) => (
+                <div className="w-full h-full bg-[#0a0a0a] border-t-2 border-neutral-800 p-4 font-retro text-lg leading-snug overflow-hidden relative shadow-inner flex flex-col justify-start">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-green-500/20"></div>
+                    <div className="text-green-500/80">
+                        {lines.map((line, i) => (
+                            <div key={i} className="mb-1">
+                                {line.startsWith('>') ? <span className="text-yellow-500 font-bold">{line}</span> : line}
+                            </div>
+                        ))}
+                        <div className="mt-2 flex">
+                            <span className="text-yellow-500 mr-2">&gt;</span>
+                            <span className="w-3 h-5 bg-green-500 cursor-blink"></span>
+                        </div>
+                    </div>
+                    {/* Scanlines overlay */}
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] pointer-events-none"></div>
+                </div>
+            );
+
+            // --- VIEW: HOME (Landing + Project Grid) ---
+            const HomeView = () => (
+                <div className="page-enter">
+                    {/* Hero Section */}
+                    <div className="min-h-screen flex flex-col justify-center items-center text-center px-4 pt-20">
+                        <h2 className="text-yellow-600 font-bold tracking-[0.4em] text-sm mb-6 uppercase animate-pulse">
+                            Portfolio 2026
+                        </h2>
+                        <h1 className="text-7xl md:text-9xl font-hero font-bold mb-8 text-white leading-none uppercase drop-shadow-2xl">
+                            Technical <br />
+                            <span className="text-gold-gradient block mt-2 tracking-wide">Game Designer</span>
+                        </h1>
+                        <p className="text-xl md:text-2xl text-neutral-400 max-w-3xl mx-auto leading-relaxed mb-12 font-light tracking-wide">
+                            {portfolioData.tagline}
+                        </p>
+                        
+                        <div className="flex gap-6 mb-20">
+                             <button 
+                                onClick={() => document.getElementById('projects-grid').scrollIntoView({ behavior: 'smooth' })}
+                                className="bg-transparent border border-yellow-600 text-yellow-500 hover:bg-yellow-600 hover:text-black px-8 py-3 rounded-sm font-hero font-bold text-sm tracking-widest uppercase transition-all flex items-center gap-2"
+                            >
+                                <ArrowRight size={16} /> Scroll to Projects
+                            </button>
+                        </div>
+
+                        {/* Skills Ticker */}
+                        <div className="flex justify-center flex-wrap gap-8 text-neutral-600 text-xs font-bold tracking-[0.2em] uppercase font-hero opacity-60">
+                            {portfolioData.skills.map((skill, idx) => (
+                                <span key={idx}>{skill}</span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Projects Section */}
+                    <div id="projects-grid" className="py-32 px-6 max-w-7xl mx-auto border-t border-white/5 bg-black/50">
+                        <div className="mb-16 flex items-end justify-between">
+                            <div>
+                                <h2 className="text-5xl font-hero font-bold text-white uppercase mb-2">Selected Works</h2>
+                                <p className="text-neutral-400 font-light text-lg">Systems, Tools, and Gameplay</p>
+                            </div>
+                        </div>
+
+                        <div className="grid gap-20">
+                            {portfolioData.projects.map((project, index) => (
+                                <div 
+                                    key={project.id} 
+                                    className="group relative bg-neutral-900/40 p-8 rounded-xl border border-white/5 hover:border-yellow-600/50 hover:bg-neutral-900/60 transition-all duration-300 cursor-pointer"
+                                    onClick={() => navigateToProject(project)}
+                                >
+                                    <div className="grid md:grid-cols-12 gap-10 items-center">
+                                        {/* Visual */}
+                                        <div className="md:col-span-7 relative aspect-video overflow-hidden rounded-lg shadow-2xl border border-white/10 flex flex-col">
+                                            {project.type === 'terminal' ? (
+                                                <TerminalVisual lines={project.terminalLines} />
+                                            ) : (
+                                                <>
+                                                    <img 
+                                                        src={project.visual} 
+                                                        alt={project.title} 
+                                                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                        <span className="text-white font-hero uppercase tracking-widest text-xl border-b-2 border-yellow-500 pb-1">View Details</span>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        {/* Text */}
+                                        <div className="md:col-span-5 flex flex-col justify-center">
+                                            <h3 className="text-4xl font-hero font-bold text-white mb-2 group-hover:text-yellow-400 transition-colors uppercase">{project.title}</h3>
+                                            <h4 className="text-sm text-yellow-600 uppercase tracking-[0.2em] font-bold mb-6">{project.subtitle}</h4>
+                                            
+                                            <p className="text-neutral-300 leading-relaxed text-sm mb-6 font-light line-clamp-3">
+                                                {project.desc}
+                                            </p>
+                                            
+                                            <div className="flex flex-wrap gap-2 mb-6">
+                                                {project.tags.map(tag => (
+                                                    <span key={tag} className="text-[9px] px-2 py-1 bg-black text-neutral-400 font-bold uppercase tracking-wider border border-white/10">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+
+                                            <span className="text-xs text-yellow-500 uppercase tracking-widest font-bold flex items-center gap-2">
+                                                Read More <ArrowRight size={12} />
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+
+            // --- VIEW: PROJECT DETAIL ---
+            const ProjectDetailView = () => {
+                if (!selectedProject) return null;
+                return (
+                    <div className="min-h-screen pt-32 pb-20 px-6 max-w-6xl mx-auto page-enter">
+                        <button 
+                            onClick={() => setView('home')} 
+                            className="mb-8 text-neutral-500 hover:text-white flex items-center gap-2 text-sm uppercase tracking-widest font-bold transition-colors"
+                        >
+                            <ArrowLeft size={16} /> Back to Projects
+                        </button>
+
+                        <div className="grid md:grid-cols-3 gap-12">
+                            {/* Left: Content */}
+                            <div className="md:col-span-2">
+                                <h1 className="text-6xl font-hero font-bold text-white uppercase mb-4">{selectedProject.title}</h1>
+                                <p className="text-xl text-yellow-500 font-light mb-8">{selectedProject.subtitle}</p>
+                                
+                                <div className="mb-8 aspect-video w-full bg-black rounded-lg border border-white/10 overflow-hidden relative">
+                                    {selectedProject.type === 'terminal' ? (
+                                        <TerminalVisual lines={selectedProject.terminalLines} />
+                                    ) : (
+                                        <img src={selectedProject.visual} alt={selectedProject.title} className="w-full h-full object-cover" />
+                                    )}
+                                </div>
+
+                                <h3 className="text-xl font-bold text-white uppercase mb-4 border-l-4 border-yellow-600 pl-4">Technical Breakdown</h3>
+                                <div className="text-neutral-300 leading-loose font-light space-y-6">
+                                    <p>{selectedProject.desc}</p>
+                                    <p>{selectedProject.detailedDesc}</p>
+                                </div>
+                            </div>
+
+                            {/* Right: Sidebar Info */}
+                            <div className="md:col-span-1">
+                                <div className="glass-panel p-6 rounded-lg sticky top-32">
+                                    <h4 className="text-xs text-neutral-500 uppercase tracking-widest font-bold mb-6">Project Info</h4>
+                                    
+                                    <div className="space-y-6">
+                                        <div>
+                                            <span className="block text-[10px] text-neutral-600 uppercase font-bold mb-1">Role</span>
+                                            <span className="text-white text-sm">{selectedProject.role}</span>
+                                        </div>
+                                        <div>
+                                            <span className="block text-[10px] text-neutral-600 uppercase font-bold mb-1">Engine</span>
+                                            <span className="text-white text-sm">{selectedProject.tags[0]}</span>
+                                        </div>
+                                        <div>
+                                            <span className="block text-[10px] text-neutral-600 uppercase font-bold mb-1">Key Tech</span>
+                                            <div className="flex flex-wrap gap-2 mt-1">
+                                                {selectedProject.tags.slice(1).map(tag => (
+                                                    <span key={tag} className="text-[10px] px-2 py-1 bg-white/5 text-yellow-500 border border-white/5">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="pt-6 border-t border-white/10">
+                                            <a 
+                                                href={selectedProject.link} 
+                                                target="_blank"
+                                                className="block w-full text-center bg-yellow-600 text-black font-bold py-3 uppercase text-xs hover:bg-white transition-colors"
+                                            >
+                                                Play / Download
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            // --- VIEW: EMBEDDED RESUME ---
+            const ResumeView = () => {
+                const { resume, contact } = portfolioData;
+
+                return (
+                    <div className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto page-enter print:pt-0 print:pb-0 print:bg-white print:text-black">
+                        {/* Actions Header */}
+                        <div className="flex justify-between items-center mb-8 print:hidden">
+                            <h2 className="text-2xl font-hero font-bold text-white uppercase">Personnel File</h2>
+                        </div>
+
+                        {/* Resume Paper Container */}
+                        <div className="glass-panel p-12 relative overflow-hidden print:shadow-none print:border-none print:p-0 print:text-black bg-neutral-900/80">
+                            {/* Decorative Header Line */}
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 print:hidden"></div>
+
+                            {/* Resume Header */}
+                            <header className="border-b-2 border-neutral-700 pb-8 mb-8 flex justify-between items-start print:border-black">
+                                <div>
+                                    <h1 className="text-4xl font-bold text-white mb-2 uppercase font-hero tracking-wide print:text-black">Amanda Hsu</h1>
+                                    <h2 className="text-lg text-yellow-500 font-mono tracking-widest uppercase print:text-black">Technical Game Designer</h2>
+                                </div>
+                                <div className="text-right text-sm text-neutral-400 leading-relaxed print:text-black">
+                                    <p>{contact.phone}</p>
+                                    <p>{contact.email}</p>
+                                    <p>{contact.location}</p>
+                                </div>
+                            </header>
+
+                            {/* Summary */}
+                            <section className="mb-8">
+                                <h3 className="text-sm font-bold text-yellow-500 uppercase tracking-widest mb-3 border-b border-neutral-800 pb-1 print:text-black print:border-black">Professional Summary</h3>
+                                <p className="text-neutral-300 text-sm leading-relaxed font-light print:text-black">
+                                    {resume.summary}
+                                </p>
+                            </section>
+
+                            {/* Skills */}
+                            <section className="mb-8">
+                                <h3 className="text-sm font-bold text-yellow-500 uppercase tracking-widest mb-3 border-b border-neutral-800 pb-1 print:text-black print:border-black">Skills</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {Object.entries(resume.skillCategories).map(([category, skills]) => (
+                                        <div key={category}>
+                                            <h4 className="text-xs font-bold text-white uppercase mb-1 print:text-black">{category}</h4>
+                                            <p className="text-xs text-neutral-400 print:text-black">{skills}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+
+                            {/* Experience */}
+                            <section className="mb-8">
+                                <h3 className="text-sm font-bold text-yellow-500 uppercase tracking-widest mb-4 border-b border-neutral-800 pb-1 print:text-black print:border-black">Practical Game Design Experience</h3>
+                                <div className="space-y-6">
+                                    {resume.experience.map((exp, idx) => (
+                                        <div key={idx}>
+                                            <div className="flex justify-between items-baseline mb-1">
+                                                <h4 className="text-white font-bold text-sm print:text-black">{exp.title}</h4>
+                                                <span className="text-xs text-neutral-500 font-mono print:text-black">{exp.period}</span>
+                                            </div>
+                                            <ul className="list-disc list-outside ml-4 space-y-1">
+                                                {exp.details.map((detail, dIdx) => (
+                                                    <li key={dIdx} className="text-xs text-neutral-300 pl-1 print:text-black">{detail}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+
+                             {/* Work History */}
+                             <section className="mb-8">
+                                <h3 className="text-sm font-bold text-yellow-500 uppercase tracking-widest mb-4 border-b border-neutral-800 pb-1 print:text-black print:border-black">Work Experience</h3>
+                                <div className="space-y-6">
+                                    {resume.work.map((job, idx) => (
+                                        <div key={idx}>
+                                            <div className="flex justify-between items-baseline mb-1">
+                                                <h4 className="text-white font-bold text-sm print:text-black">{job.role} <span className="text-neutral-500 font-normal">| {job.company}</span></h4>
+                                                <span className="text-xs text-neutral-500 font-mono print:text-black">{job.period}</span>
+                                            </div>
+                                            <ul className="list-disc list-outside ml-4 space-y-1">
+                                                {job.details.map((detail, dIdx) => (
+                                                    <li key={dIdx} className="text-xs text-neutral-300 pl-1 print:text-black">{detail}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+
+                            {/* Education */}
+                            <section>
+                                <h3 className="text-sm font-bold text-yellow-500 uppercase tracking-widest mb-4 border-b border-neutral-800 pb-1 print:text-black print:border-black">Education</h3>
+                                <div className="space-y-4">
+                                    {resume.education.map((edu, idx) => (
+                                        <div key={idx}>
+                                            <div className="flex justify-between items-baseline mb-1">
+                                                <h4 className="text-white font-bold text-sm print:text-black">{edu.school}</h4>
+                                                <span className="text-xs text-neutral-500 font-mono print:text-black">{edu.period}</span>
+                                            </div>
+                                            <p className="text-xs text-neutral-300 italic mb-1 print:text-black">{edu.degree}</p>
+                                            {edu.details.length > 0 && (
+                                                <p className="text-xs text-neutral-400 print:text-black">{edu.details.join(" • ")}</p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                );
+            };
+
+            // --- VIEW: ABOUT ---
+            const AboutView = () => (
+                <div className="min-h-screen pt-32 pb-20 px-6 max-w-5xl mx-auto page-enter">
+                    <div className="grid md:grid-cols-12 gap-12">
+                        {/* Profile Info */}
+                        <div className="md:col-span-5">
+                            <div className="glass-panel p-8 relative overflow-hidden rounded-lg border-t-4 border-yellow-600">
+                                <h3 className="text-2xl font-hero font-bold text-white mb-6 uppercase">Contact</h3>
+                                <div className="space-y-4 text-sm text-neutral-300 mb-8">
+                                    <div>
+                                        <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Email</p>
+                                        <a href={`mailto:${portfolioData.contact.email}`} className="text-white hover:text-yellow-500 transition-colors flex items-center gap-2">
+                                            {portfolioData.contact.email}
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Based In</p>
+                                        <p className="text-white">Cleveland, OH (Open to Relocate)</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Nationality</p>
+                                        <p className="text-white">Taiwan</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Languages</p>
+                                        <p className="text-white">Mandarin, English</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Education</p>
+                                        <p className="text-white">Case Western Reserve Univ.</p>
+                                        <p className="text-xs text-yellow-600 mt-1">CS & Theater Arts '27</p>
+                                        <p className="text-xs text-neutral-400">Game Design Minor</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Skills Grid for Sidebar */}
+                            <div className="mt-8">
+                                <h4 className="text-sm font-bold text-white uppercase tracking-widest mb-4 border-b border-white/10 pb-2">Technical Skills</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {portfolioData.skills.map(skill => (
+                                        <span key={skill} className="px-3 py-2 bg-neutral-900 text-neutral-400 text-xs border border-white/5 rounded-sm">
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="md:col-span-7">
+                            <h2 className="text-5xl font-hero font-bold text-white mb-8 uppercase">
+                                About Me
+                            </h2>
+                            <div className="space-y-6 text-lg text-neutral-300 font-light leading-loose">
+                                <p>
+                                    Hi, I’m <strong className="text-white">Amanda Hsu</strong>. I’m passionate about <strong>hands-on game development</strong> and using scripting and code to bring gameplay ideas to life.
+                                </p>
+                                <p>
+                                    I enjoy prototyping mechanics, implementing game systems, and iterating on features alongside designers and engineers.
+                                </p>
+                                <p>
+                                    I’m especially interested in turning concepts into playable experiences and contributing directly to how a game feels and plays, while learning to work within existing systems and workflows.
+                                </p>
+                                
+                                <p className="mt-8 pt-8 border-t border-white/10">
+                                    Currently studying at <strong>CWRU</strong>, I am seeking a <strong>Tech Design Internship</strong> for Summer 2026 where I can contribute directly to gameplay implementation and system design.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            // --- Render Logic ---
+            return (
+                <div className="relative min-h-screen bg-black selection:bg-yellow-600 selection:text-black">
+                    <ThreeBackground />
+                    
+                    <div className="relative z-10">
+                        <Nav />
+                        
+                        <main className="transition-all duration-500">
+                            {view === 'home' && <HomeView />}
+                            {view === 'detail' && <ProjectDetailView />}
+                            {view === 'about' && <AboutView />}
+                            {view === 'resume' && <ResumeView />}
+                        </main>
+
+                        <footer className="border-t border-white/5 py-12 text-center bg-black/80 backdrop-blur-md print:hidden">
+                            <p className="text-neutral-600 text-[10px] tracking-[0.3em] uppercase font-bold">© 2025 Amanda Hsu. Tech Design.</p>
+                        </footer>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
